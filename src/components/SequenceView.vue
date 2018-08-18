@@ -3,8 +3,8 @@
     <transition-group name="list" tag="p">
       <div
         class="key-container"
-        v-for="(keyInfo, index) in keyInfoList"
-        v-if="index >= keyInfoList.length - maxKeys"
+        v-for="(keyInfo, index) in keyInfoSequence"
+        v-if="index >= keyInfoSequence.length - maxKeys"
         :key="keyInfo.sequence"
         v-bind:style="{ left: (keyInfo.sequence % maxKeys) * keyWidth  + 'px' }"
       >
@@ -25,7 +25,7 @@ import Key from './Key.vue';
   },
 })
 export default class SequenceView extends Vue {
-  @Prop() private keyInfoList!: KeyInfoWithSequence[];
+  @Prop() private keyInfoSequence!: KeyInfoWithSequence[];
   readonly maxKeys = 10;
   readonly keyWidth = 40;
 }
@@ -33,6 +33,7 @@ export default class SequenceView extends Vue {
 
 <style scoped>
 .conatiner {
+  height: 60px;
 }
 .key-container {
   display: inline-block;

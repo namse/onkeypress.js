@@ -40,10 +40,10 @@ const SCAN_CODE: { [scanCode: number]: string } = {
   37: 'K',
   38: 'L',
   39: '; :',
-  40: ' "',
+  40: '\' "',
   41: '` ~',
   42: 'L SH',
-  43: ' |',
+  43: '\\ |',
   44: 'Z',
   45: 'X',
   46: 'C',
@@ -165,6 +165,8 @@ const SCAN_CODE: { [scanCode: number]: string } = {
   164: 'Alt / (num)',
   165: 'Alt Tab',
   166: 'Alt Enter (num)',
+  3675: 'Win',
+  10000: 'Fn',
 };
 
 export default SCAN_CODE;

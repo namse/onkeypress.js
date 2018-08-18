@@ -1,6 +1,7 @@
 <template>
   <div id="app">
-    <SequenceView :keyInfoList="keyInfoList"/>
+    <SequenceView :keyInfoSequence="keyInfoSequence"/>
+    <KeyboardView :keyPressingMap="keyPressingMap"/>
   </div>
 </template>
 
@@ -9,43 +10,57 @@ import { Component, Vue } from 'vue-property-decorator';
 import SequenceView from './components/SequenceView.vue';
 import SCAN_CODE from '@/scanCode';
 import { KeyInfoWithSequence } from './KeyInfo';
+import KeyboardView from './components/KeyboardView.vue';
+
 
 declare var ioHook: any;
+
+const ioHookDifferntKeyMap = {
+  // iohook keycode : scancode
+  3639: 55,
+}
 
 @Component({
   components: {
     SequenceView,
+    KeyboardView,
   },
 })
 export default class App extends Vue {
-  keyInfoList: KeyInfoWithSequence[] = [];
+  keyInfoSequence: KeyInfoWithSequence[] = [];
   keyPressingMap: { [keycode: number]: boolean } = {};
   readonly keyInfoDeleteLifeTime = 2000; // ms
 
   mounted() {
-    this.keyInfoList = [];
+    this.keyInfoSequence = [];
     ioHook.on('keydown', (event: ioHookEvent) => {
       const isKeyPressing = this.keyPressingMap[event.keycode];
       if (!isKeyPressing) {
-        const lastKeyInfo = this.keyInfoList[this.keyInfoList.length - 1];
+        const lastKeyInfo = this.keyInfoSequence[this.keyInfoSequence.length - 1];
         const sequence = lastKeyInfo ? lastKeyInfo.sequence + 1 : 0;
         const keyInfo: KeyInfoWithSequence = {
           scanCode: event.keycode,
           display: SCAN_CODE[event.keycode],
           sequence,
         };
-        this.keyInfoList.push(keyInfo);
+        this.keyInfoSequence.push(keyInfo);
 
         setTimeout(() => {
-          this.keyInfoList.shift();
+          this.keyInfoSequence.shift();
         }, this.keyInfoDeleteLifeTime);
       }
 
-      this.keyPressingMap[event.keycode] = true;
+      this.keyPressingMap = {
+        ...this.keyPressingMap,
+        [event.keycode]: true,
+      };
     });
 
     ioHook.on('keyup', (event: ioHookEvent) => {
-      this.keyPressingMap[event.keycode] = false;
+      this.keyPressingMap = {
+        ...this.keyPressingMap,
+        [event.keycode]: false,
+      };
     });
 
     ioHook.start();
