@@ -8,7 +8,7 @@
 import { Component, Vue } from 'vue-property-decorator';
 import SequenceView from './components/SequenceView.vue';
 import SCAN_CODE from '@/scanCode';
-import { KeyInfo } from './KeyInfo';
+import { KeyInfoWithSequence } from './KeyInfo';
 
 declare var ioHook: any;
 
@@ -18,17 +18,34 @@ declare var ioHook: any;
   },
 })
 export default class App extends Vue {
-  keyInfoList: KeyInfo[] = [];
+  keyInfoList: KeyInfoWithSequence[] = [];
+  keyPressingMap: { [keycode: number]: boolean } = {};
+  readonly keyInfoDeleteLifeTime = 2000; // ms
 
   mounted() {
     this.keyInfoList = [];
     ioHook.on('keydown', (event: ioHookEvent) => {
-      console.log(event);
-      const keyInfo: KeyInfo = {
-        scanCode: event.keycode,
-        display: SCAN_CODE[event.keycode],
-      };
-      this.keyInfoList.push(keyInfo);
+      const isKeyPressing = this.keyPressingMap[event.keycode];
+      if (!isKeyPressing) {
+        const lastKeyInfo = this.keyInfoList[this.keyInfoList.length - 1];
+        const sequence = lastKeyInfo ? lastKeyInfo.sequence + 1 : 0;
+        const keyInfo: KeyInfoWithSequence = {
+          scanCode: event.keycode,
+          display: SCAN_CODE[event.keycode],
+          sequence,
+        };
+        this.keyInfoList.push(keyInfo);
+
+        setTimeout(() => {
+          this.keyInfoList.shift();
+        }, this.keyInfoDeleteLifeTime);
+      }
+
+      this.keyPressingMap[event.keycode] = true;
+    });
+
+    ioHook.on('keyup', (event: ioHookEvent) => {
+      this.keyPressingMap[event.keycode] = false;
     });
 
     ioHook.start();

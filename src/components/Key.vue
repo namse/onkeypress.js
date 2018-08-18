@@ -18,5 +18,7 @@ export default class Key extends Vue {
 .container {
   width: 30px;
   height: 30px;
+  border: 2px outset black;
+  border-radius: 5px;
 }
 </style>
